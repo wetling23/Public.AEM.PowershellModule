@@ -5,10 +5,13 @@ Function Get-AemSoftwareList {
         .NOTES
             V1.0.0.0 date: 17 August 2018
                 - Initial release.
+            V1.0.0.1 date: 23 August 2018
+                - Updated output.
+                - Fixed bug in setting up the web request parameters.
         .PARAMETER
         .EXAMPLE
     #>
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'Default')]
     Param (
         [Parameter(Mandatory = $True, ValueFromPipeline = $true)]
         [string]$AemAccessToken,
@@ -43,6 +46,9 @@ Function Get-AemSoftwareList {
         $message = ("{0}: Beginning {1}." -f (Get-Date -Format s), $MyInvocation.MyCommand)
         If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
+        $message = ("{0}: Operating in {1}." -f (Get-Date -Format s), $PsCmdlet.ParameterSetName)
+        If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
+
         # Setup the parameters for Get-AemDevices.
         If (($PSBoundParameters['Verbose'])) {
             $deviceQueryParams = @{
@@ -64,11 +70,17 @@ Function Get-AemSoftwareList {
 
         Switch ($PsCmdlet.ParameterSetName) {
             "IdFilter" {
+                $message = ("{0}: Attempting to retrieve the UID of device {1}." -f (Get-Date -Format s), $DeviceId)
+                If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
+
                 $DeviceUId = (Get-AemDevices -DeviceId $DeviceId @deviceQueryParams).Uid
             }
         }
 
-        If ($DeviceId -as [int]) {
+        If ($DeviceUId) {
+            $message = ("{0}: Found {1}." -f (Get-Date -Format s), $DeviceUid)
+            If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
+
             $params = @{
                 Uri         = '{0}/api{1}' -f $ApiUrl, "/v2/audit/device/$DeviceUid/software"
                 Method      = 'GET'
@@ -98,4 +110,4 @@ Function Get-AemSoftwareList {
             Return "Error"
         }
     }
-}
+} #1.0.0.0
