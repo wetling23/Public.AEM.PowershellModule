@@ -1,13 +1,13 @@
 @{
 
     # Script module or binary module file associated with this manifest
-    RootModule        = 'AutoTaskEndpointManagement.psm1'
+    RootModule        = 'LogicMonitor.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '1.0.0.3'
+    ModuleVersion     = '1.0.0.39'
 
     # ID used to uniquely identify this module
-    GUID              = 'b3b16a0a-35f8-4ee9-bd4d-868e8b1dc24a'
+    GUID              = '6ef13f0b-48da-4c3b-81b2-03fa464ef8fd'
 
     # Author of this module
     Author            = 'Mike Hashemi'
@@ -19,7 +19,7 @@
     Copyright         = '(c) 2018 mhashemi. All rights reserved.'
 
     # Description of the functionality provided by this module
-    Description       = 'Powershell module refactoring the AutoTask Endpoint Management REST API.'
+    Description       = 'LogicMonitor REST API-related functions.'
 
     # Minimum version of the Windows PowerShell engine required by this module
     PowerShellVersion = '5.0'
@@ -58,9 +58,19 @@
     # NestedModules = @()
 
     # Functions to export from this module
-    FunctionsToExport = 'Find-AemSoftwareInstance', 
-    'Get-AemDevicesFromSite', 'Get-AemDevices', 'Get-AemSites', 'Get-AemSoftwareList', 'Get-AemUsers',
-    'New-AemApiToken'
+    FunctionsToExport = 'Add-EventLogSource', 'Add-LogicMonitorCollector', 'Add-LogicMonitorDevice',
+    'Add-LogicMonitorDeviceGroup',
+    'Confirm-OutputPathAvailability',
+    'Get-LogicMonitorAlertRules', 'Get-LogicMonitorAuditLogs', 'Get-LogicMonitorCollectorInstaller',
+    'Get-LogicMonitorCollectors', 'Get-LogicMonitorCollectorUpgradeHistory', 'Get-LogicMonitorDataSources',
+    'Get-LogicMonitorDeviceGroupProperties', 'Get-LogicMonitorDeviceGroups', 'Get-LogicMonitorDeviceProperties',
+    'Get-LogicMonitorDevices', 'Get-LogicMonitorSdt', 'Get-LogicMonitorServiceProperties',
+    'Get-LogicMonitorRoles', 'Get-LogicMonitorServices',
+    'Remove-LogicMonitorCollector', 'Remove-LogicMonitorCollectorVersion', 'Remove-LogicMonitorDevice',
+    'Remove-LogicMonitorDeviceProperties',
+    'Start-LogicMonitorDeviceSdt',
+    'Update-LogicMonitorAlertRulesProperties', 'Update-LogicMonitorCollectorProperties',
+    'Update-LogicMonitorCollectorVersion', 'Update-LogicMonitorDeviceProperties'
 
     # Cmdlets to export from this module
     CmdletsToExport   = '*'
@@ -83,27 +93,25 @@
         PSData = @{
 
             # Tags applied to this module. These help with module discovery in online galleries.
-            # Tags = @()
+            Tags         = @("LogicMonitor")
 
             # A URL to the license for this module.
             # LicenseUri = ''
 
             # A URL to the main website for this project.
-            ProjectUri = 'https://github.com/wetling23/Public.AEM.PowershellModule'
+            ProjectUri   = 'https://github.com/wetling23/logicmonitor-posh-module'
 
             # A URL to an icon representing this module.
             # IconUri = ''
 
             # ReleaseNotes of this module
-            ReleaseNotes = 'Fixed exported cmdlet names.'
+            ReleaseNotes = 'Updated Remove-LogicMonitorCollectorVersion to 1.0.0.1. Updated comments.'
 
             # External dependent modules of this module
             # ExternalModuleDependencies = ''
 
         } # End of PSData hashtable
-    
     } # End of PrivateData hashtable
-
 
     # HelpInfo URI of this module
     # HelpInfoURI = ''
