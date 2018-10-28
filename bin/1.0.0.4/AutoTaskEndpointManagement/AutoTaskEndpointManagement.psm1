@@ -247,6 +247,12 @@ Function Get-AemDevices {
             Default value is 'AemPowerShellModule'. This parameter is used to specify the event source, that script/modules will use for logging.
         .PARAMETER BlockLogging
             When this switch is included, the code will write output only to the host and will not attempt to write to the Event Log.
+        .EXAMPLE
+            Get-AemDevices -AemAccessToken $token
+            This will return all devices. 
+        .EXAMPLE
+            Get-AemDevices -AemAccessToken $token -DeviceId $id
+            This will return the device matching the specified id.
     #>
     [CmdletBinding(DefaultParameterSetName = ’AllDevices’)]
     Param (
@@ -380,6 +386,9 @@ Function Get-AemDevicesFromSite {
             Default value is 'AemPowerShellModule'. This parameter is used to specify the event source, that script/modules will use for logging.
         .PARAMETER BlockLogging
             When this switch is included, the code will write output only to the host and will not attempt to write to the Event Log.
+        .EXAMPLE
+            Get-AemDevicesFromSite -AemAccessToken $token -SiteUid $uid
+            This will get the devices for the specified site. 
     #>
     [CmdletBinding()]
     Param (
@@ -494,6 +503,9 @@ Function Get-AemSites {
             Default value is 'AemPowerShellModule'. This parameter is used to specify the event source, that script/modules will use for logging.
         .PARAMETER BlockLogging
             When this switch is included, the code will write output only to the host and will not attempt to write to the Event Log.
+        .EXAMPLE
+            Get-AemSites -AemAccessToken $token
+            This will return all sites.
     #>
     [CmdletBinding(DefaultParameterSetName = ’AllSites’)]
     Param (
@@ -618,8 +630,21 @@ Function Get-AemSoftwareList {
             V1.0.0.1 date: 23 August 2018
                 - Updated output.
                 - Fixed bug in setting up the web request parameters.
-        .PARAMETER
+        .PARAMETER AemAccessToken
+            Mandatory parameter. Represents the token returned once successful authentication to the API is achieved. Use New-AemApiAccessToken to obtain the token.
+        .PARAMETER DeviceId
+            Device to get the software list for, by id. 
+        .PARAMETER DeviceUID
+            Device to get the software list for, by uid.
+        .PARAMETER ApiUrl
+            Default value is 'https://zinfandel-api.centrastage.net'. Represents the URL to AutoTask's AEM API, for the desired instance.
+        .PARAMETER EventLogSource
+            Default value is 'AemPowerShellModule'. This parameter is used to specify the event source, that script/modules will use for logging.
+        .PARAMETER BlockLogging
+            When this switch is included, the code will write output only to the host and will not attempt to write to the Event Log.
         .EXAMPLE
+            Get-AemSoftwareList -DeviceUid $uid -AemAccessToken $token
+            Get the list of software for the agent specified by the uid.
     #>
     [CmdletBinding(DefaultParameterSetName = 'Default')]
     Param (
@@ -851,7 +876,7 @@ Function New-AemApiAccessToken {
         .PARAMETER ApiKey
             Mandatory parameter. Represents the API key to AEM's REST API.
         .PARAMETER ApiSecretKey
-                Mandatory parameter. Represents the API secret key to AEM's REST API.
+            Mandatory parameter. Represents the API secret key to AEM's REST API.
         .PARAMETER EventLogSource
             Default value is 'AemPowerShellModule'. This parameter is used to specify the event source, that script/modules will use for logging.
         .PARAMETER ApiUrl
@@ -860,6 +885,9 @@ Function New-AemApiAccessToken {
             When this switch is included, the code will write output only to the host and will not attempt to write to the Event Log.
         .EXAMPLE
             .\New-AemApiAccessToken -ApiKey XXXXXXXXXXXXXXXXXXXX -ApiSecretKey XXXXXXXXXXXXXXXXXXXX
+        .EXAMPLE
+            $token = New-AemApiAccessToken -ApiKey XXXXXXXXXXXXXXXXXXXX -ApiSecretKey XXXXXXXXXXXXXXXXXXXX
+            Store your token in a variable for later use and re-use. 
     #>
     [CmdletBinding()]
     param (
