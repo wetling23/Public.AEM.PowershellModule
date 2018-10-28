@@ -189,7 +189,7 @@ Function Find-AemSoftwareInstance {
             If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
             Try {
-                $webrequest = Invoke-WebRequest @params -ErrorAction Stop | ConvertFrom-Json
+                $webrequest = Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop | ConvertFrom-Json
             }
             Catch {
                 $message = ("{0}: It appears that the web request failed. The specific error message is: {1}" -f (Get-Date -Format s), $_.Exception.Message)
@@ -308,7 +308,7 @@ Function Get-AemDevices {
         If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
         Try {
-            $webResponse = (Invoke-WebRequest @params -ErrorAction Stop).Content
+            $webResponse = (Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop).Content
         }
         Catch {
             $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
@@ -342,7 +342,7 @@ Function Get-AemDevices {
             If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
             Try {
-                $webResponse = (Invoke-WebRequest @params).Content
+                $webResponse = (Invoke-WebRequest @params -UseBasicParsing).Content
             }
             Catch {
                 $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
@@ -425,7 +425,7 @@ Function Get-AemDevicesFromSite {
         If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
         Try {
-            $webResponse = (Invoke-WebRequest @params -ErrorAction Stop).Content
+            $webResponse = (Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop).Content
         }
         Catch {
             $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
@@ -452,7 +452,7 @@ Function Get-AemDevicesFromSite {
             If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
             Try {
-                $webResponse = (Invoke-WebRequest @params).Content
+                $webResponse = (Invoke-WebRequest @params -UseBasicParsing).Content
             }
             Catch {
                 $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
@@ -555,7 +555,7 @@ Function Get-AemSites {
         If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
         Try {
-            $webResponse = (Invoke-WebRequest @params -ErrorAction Stop).Content
+            $webResponse = (Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop).Content
         }
         Catch {
             $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
@@ -589,7 +589,7 @@ Function Get-AemSites {
             If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
             Try {
-                $webResponse = (Invoke-WebRequest @params).Content
+                $webResponse = (Invoke-WebRequest -UseBasicParsing @params).Content
             }
             Catch {
                 $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
@@ -702,7 +702,7 @@ Function Get-AemSoftwareList {
             If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
             Try {
-                $webResponse = Invoke-WebRequest @params -ErrorAction Stop | ConvertFrom-Json
+                $webResponse = Invoke-WebRequest -UseBasicParsing @params -ErrorAction Stop | ConvertFrom-Json
             }
             Catch {
                 $message = ("{0}: It appears that the web request failed. The specific error message is: {1}" -f (Get-Date -Format s), $_.Exception.Message)
@@ -784,7 +784,7 @@ Function Get-AemUsers {
         If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
         Try {
-            $webResponse = (Invoke-WebRequest @params -ErrorAction Stop).Content
+            $webResponse = (Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop).Content
         }
         Catch {
             $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
@@ -811,7 +811,7 @@ Function Get-AemUsers {
             If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
             Try {
-                $webResponse = (Invoke-WebRequest @params).Content
+                $webResponse = (Invoke-WebRequest -UseBasicParsing @params).Content
             }
             Catch {
                 $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
@@ -845,6 +845,8 @@ Function New-AemApiAccessToken {
                 - Added return.
                 - Fixed output bug. The -BlockLogging parameter was blocking all output.
                 - Updated white space.
+            V1.0.0.3 date: 27 October 2018 - by Konstantin Kaminskiy
+                - Adjusted returned data to include only the access token itself to increase ease of use
         .LINK
         .PARAMETER ApiKey
             Mandatory parameter. Represents the API key to AEM's REST API.
@@ -909,7 +911,7 @@ Function New-AemApiAccessToken {
 
     # Request access token.
     Try {
-        $webResponse = Invoke-WebRequest @params -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+        $webResponse = Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop | Select-Object -ExpandProperty access_token
     }
     Catch {
         $message = ("{0}: Unexpected error generating an authorization token. To prevent errors, {1} will exit. The specific error message is: {2}" `
