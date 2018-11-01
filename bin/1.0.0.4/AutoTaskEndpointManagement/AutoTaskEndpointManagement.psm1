@@ -189,7 +189,7 @@ Function Find-AemSoftwareInstance {
             If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
             Try {
-                $webrequest = Invoke-WebRequest @params -ErrorAction Stop | ConvertFrom-Json
+                $webrequest = Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop | ConvertFrom-Json
             }
             Catch {
                 $message = ("{0}: It appears that the web request failed. The specific error message is: {1}" -f (Get-Date -Format s), $_.Exception.Message)
@@ -247,6 +247,12 @@ Function Get-AemDevices {
             Default value is 'AemPowerShellModule'. This parameter is used to specify the event source, that script/modules will use for logging.
         .PARAMETER BlockLogging
             When this switch is included, the code will write output only to the host and will not attempt to write to the Event Log.
+        .EXAMPLE
+            Get-AemDevices -AemAccessToken $token
+            This will return all devices. 
+        .EXAMPLE
+            Get-AemDevices -AemAccessToken $token -DeviceId $id
+            This will return the device matching the specified id.
     #>
     [CmdletBinding(DefaultParameterSetName = ’AllDevices’)]
     Param (
@@ -308,7 +314,7 @@ Function Get-AemDevices {
         If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
         Try {
-            $webResponse = (Invoke-WebRequest @params -ErrorAction Stop).Content
+            $webResponse = (Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop).Content
         }
         Catch {
             $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
@@ -342,7 +348,7 @@ Function Get-AemDevices {
             If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
             Try {
-                $webResponse = (Invoke-WebRequest @params).Content
+                $webResponse = (Invoke-WebRequest @params -UseBasicParsing).Content
             }
             Catch {
                 $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
@@ -380,6 +386,9 @@ Function Get-AemDevicesFromSite {
             Default value is 'AemPowerShellModule'. This parameter is used to specify the event source, that script/modules will use for logging.
         .PARAMETER BlockLogging
             When this switch is included, the code will write output only to the host and will not attempt to write to the Event Log.
+        .EXAMPLE
+            Get-AemDevicesFromSite -AemAccessToken $token -SiteUid $uid
+            This will get the devices for the specified site. 
     #>
     [CmdletBinding()]
     Param (
@@ -425,7 +434,7 @@ Function Get-AemDevicesFromSite {
         If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
         Try {
-            $webResponse = (Invoke-WebRequest @params -ErrorAction Stop).Content
+            $webResponse = (Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop).Content
         }
         Catch {
             $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
@@ -452,7 +461,7 @@ Function Get-AemDevicesFromSite {
             If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
             Try {
-                $webResponse = (Invoke-WebRequest @params).Content
+                $webResponse = (Invoke-WebRequest @params -UseBasicParsing).Content
             }
             Catch {
                 $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
@@ -494,6 +503,9 @@ Function Get-AemSites {
             Default value is 'AemPowerShellModule'. This parameter is used to specify the event source, that script/modules will use for logging.
         .PARAMETER BlockLogging
             When this switch is included, the code will write output only to the host and will not attempt to write to the Event Log.
+        .EXAMPLE
+            Get-AemSites -AemAccessToken $token
+            This will return all sites.
     #>
     [CmdletBinding(DefaultParameterSetName = ’AllSites’)]
     Param (
@@ -555,7 +567,7 @@ Function Get-AemSites {
         If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
         Try {
-            $webResponse = (Invoke-WebRequest @params -ErrorAction Stop).Content
+            $webResponse = (Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop).Content
         }
         Catch {
             $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
@@ -589,7 +601,7 @@ Function Get-AemSites {
             If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
             Try {
-                $webResponse = (Invoke-WebRequest @params).Content
+                $webResponse = (Invoke-WebRequest -UseBasicParsing @params).Content
             }
             Catch {
                 $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
@@ -618,8 +630,21 @@ Function Get-AemSoftwareList {
             V1.0.0.1 date: 23 August 2018
                 - Updated output.
                 - Fixed bug in setting up the web request parameters.
-        .PARAMETER
+        .PARAMETER AemAccessToken
+            Mandatory parameter. Represents the token returned once successful authentication to the API is achieved. Use New-AemApiAccessToken to obtain the token.
+        .PARAMETER DeviceId
+            Device to get the software list for, by id. 
+        .PARAMETER DeviceUID
+            Device to get the software list for, by uid.
+        .PARAMETER ApiUrl
+            Default value is 'https://zinfandel-api.centrastage.net'. Represents the URL to AutoTask's AEM API, for the desired instance.
+        .PARAMETER EventLogSource
+            Default value is 'AemPowerShellModule'. This parameter is used to specify the event source, that script/modules will use for logging.
+        .PARAMETER BlockLogging
+            When this switch is included, the code will write output only to the host and will not attempt to write to the Event Log.
         .EXAMPLE
+            Get-AemSoftwareList -DeviceUid $uid -AemAccessToken $token
+            Get the list of software for the agent specified by the uid.
     #>
     [CmdletBinding(DefaultParameterSetName = 'Default')]
     Param (
@@ -702,7 +727,7 @@ Function Get-AemSoftwareList {
             If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
             Try {
-                $webResponse = Invoke-WebRequest @params -ErrorAction Stop | ConvertFrom-Json
+                $webResponse = Invoke-WebRequest -UseBasicParsing @params -ErrorAction Stop | ConvertFrom-Json
             }
             Catch {
                 $message = ("{0}: It appears that the web request failed. The specific error message is: {1}" -f (Get-Date -Format s), $_.Exception.Message)
@@ -784,7 +809,7 @@ Function Get-AemUsers {
         If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
         Try {
-            $webResponse = (Invoke-WebRequest @params -ErrorAction Stop).Content
+            $webResponse = (Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop).Content
         }
         Catch {
             $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
@@ -811,7 +836,7 @@ Function Get-AemUsers {
             If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
             Try {
-                $webResponse = (Invoke-WebRequest @params).Content
+                $webResponse = (Invoke-WebRequest -UseBasicParsing @params).Content
             }
             Catch {
                 $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
@@ -845,11 +870,13 @@ Function New-AemApiAccessToken {
                 - Added return.
                 - Fixed output bug. The -BlockLogging parameter was blocking all output.
                 - Updated white space.
+            V1.0.0.3 date: 27 October 2018 - by Konstantin Kaminskiy
+                - Adjusted returned data to include only the access token itself to increase ease of use
         .LINK
         .PARAMETER ApiKey
             Mandatory parameter. Represents the API key to AEM's REST API.
         .PARAMETER ApiSecretKey
-                Mandatory parameter. Represents the API secret key to AEM's REST API.
+            Mandatory parameter. Represents the API secret key to AEM's REST API.
         .PARAMETER EventLogSource
             Default value is 'AemPowerShellModule'. This parameter is used to specify the event source, that script/modules will use for logging.
         .PARAMETER ApiUrl
@@ -858,6 +885,9 @@ Function New-AemApiAccessToken {
             When this switch is included, the code will write output only to the host and will not attempt to write to the Event Log.
         .EXAMPLE
             .\New-AemApiAccessToken -ApiKey XXXXXXXXXXXXXXXXXXXX -ApiSecretKey XXXXXXXXXXXXXXXXXXXX
+        .EXAMPLE
+            $token = New-AemApiAccessToken -ApiKey XXXXXXXXXXXXXXXXXXXX -ApiSecretKey XXXXXXXXXXXXXXXXXXXX
+            Store your token in a variable for later use and re-use. 
     #>
     [CmdletBinding()]
     param (
@@ -909,7 +939,7 @@ Function New-AemApiAccessToken {
 
     # Request access token.
     Try {
-        $webResponse = Invoke-WebRequest @params -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+        $webResponse = Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop | Select-Object -ExpandProperty access_token
     }
     Catch {
         $message = ("{0}: Unexpected error generating an authorization token. To prevent errors, {1} will exit. The specific error message is: {2}" `
