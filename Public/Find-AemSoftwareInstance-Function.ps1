@@ -1,4 +1,3 @@
-
 Function Find-AemSoftwareInstance {
     <#
         .DESCRIPTION
@@ -119,7 +118,7 @@ Function Find-AemSoftwareInstance {
             If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
             Try {
-                $webrequest = Invoke-WebRequest @params -ErrorAction Stop | ConvertFrom-Json
+                $webrequest = Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop | ConvertFrom-Json
             }
             Catch {
                 $message = ("{0}: It appears that the web request failed. The specific error message is: {1}" -f (Get-Date -Format s), $_.Exception.Message)

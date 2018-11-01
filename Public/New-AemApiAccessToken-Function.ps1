@@ -13,11 +13,13 @@
                 - Added return.
                 - Fixed output bug. The -BlockLogging parameter was blocking all output.
                 - Updated white space.
+            V1.0.0.3 date: 27 October 2018 - by Konstantin Kaminskiy
+                - Adjusted returned data to include only the access token itself to increase ease of use
         .LINK
         .PARAMETER ApiKey
             Mandatory parameter. Represents the API key to AEM's REST API.
         .PARAMETER ApiSecretKey
-                Mandatory parameter. Represents the API secret key to AEM's REST API.
+            Mandatory parameter. Represents the API secret key to AEM's REST API.
         .PARAMETER EventLogSource
             Default value is 'AemPowerShellModule'. This parameter is used to specify the event source, that script/modules will use for logging.
         .PARAMETER ApiUrl
@@ -26,6 +28,9 @@
             When this switch is included, the code will write output only to the host and will not attempt to write to the Event Log.
         .EXAMPLE
             .\New-AemApiAccessToken -ApiKey XXXXXXXXXXXXXXXXXXXX -ApiSecretKey XXXXXXXXXXXXXXXXXXXX
+        .EXAMPLE
+            $token = New-AemApiAccessToken -ApiKey XXXXXXXXXXXXXXXXXXXX -ApiSecretKey XXXXXXXXXXXXXXXXXXXX
+            Store your token in a variable for later use and re-use. 
     #>
     [CmdletBinding()]
     param (
@@ -77,7 +82,7 @@
 
     # Request access token.
     Try {
-        $webResponse = Invoke-WebRequest @params -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+        $webResponse = Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop | Select-Object -ExpandProperty access_token
     }
     Catch {
         $message = ("{0}: Unexpected error generating an authorization token. To prevent errors, {1} will exit. The specific error message is: {2}" `

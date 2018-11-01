@@ -8,8 +8,21 @@ Function Get-AemSoftwareList {
             V1.0.0.1 date: 23 August 2018
                 - Updated output.
                 - Fixed bug in setting up the web request parameters.
-        .PARAMETER
+        .PARAMETER AemAccessToken
+            Mandatory parameter. Represents the token returned once successful authentication to the API is achieved. Use New-AemApiAccessToken to obtain the token.
+        .PARAMETER DeviceId
+            Device to get the software list for, by id. 
+        .PARAMETER DeviceUID
+            Device to get the software list for, by uid.
+        .PARAMETER ApiUrl
+            Default value is 'https://zinfandel-api.centrastage.net'. Represents the URL to AutoTask's AEM API, for the desired instance.
+        .PARAMETER EventLogSource
+            Default value is 'AemPowerShellModule'. This parameter is used to specify the event source, that script/modules will use for logging.
+        .PARAMETER BlockLogging
+            When this switch is included, the code will write output only to the host and will not attempt to write to the Event Log.
         .EXAMPLE
+            Get-AemSoftwareList -DeviceUid $uid -AemAccessToken $token
+            Get the list of software for the agent specified by the uid.
     #>
     [CmdletBinding(DefaultParameterSetName = 'Default')]
     Param (
@@ -92,7 +105,7 @@ Function Get-AemSoftwareList {
             If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
             Try {
-                $webResponse = Invoke-WebRequest @params -ErrorAction Stop | ConvertFrom-Json
+                $webResponse = Invoke-WebRequest -UseBasicParsing @params -ErrorAction Stop | ConvertFrom-Json
             }
             Catch {
                 $message = ("{0}: It appears that the web request failed. The specific error message is: {1}" -f (Get-Date -Format s), $_.Exception.Message)

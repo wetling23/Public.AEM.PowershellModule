@@ -4,7 +4,7 @@
     RootModule        = 'AutoTaskEndpointManagement.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '1.0.0.4'
+    ModuleVersion     = '1.0.0.5'
 
     # ID used to uniquely identify this module
     GUID              = 'b3b16a0a-35f8-4ee9-bd4d-868e8b1dc24a'
@@ -95,7 +95,7 @@
             # IconUri = ''
 
             # ReleaseNotes of this module
-            ReleaseNotes = 'Fixed name of New-AemApiAccessToken.'
+            ReleaseNotes = 'Updates made by https://github.com/KonTheCat to include "-UseBasicParsing", documentation updates, and New-AemApiAccessToken output change.'
 
             # External dependent modules of this module
             # ExternalModuleDependencies = ''

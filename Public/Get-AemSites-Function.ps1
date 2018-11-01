@@ -21,6 +21,9 @@
             Default value is 'AemPowerShellModule'. This parameter is used to specify the event source, that script/modules will use for logging.
         .PARAMETER BlockLogging
             When this switch is included, the code will write output only to the host and will not attempt to write to the Event Log.
+        .EXAMPLE
+            Get-AemSites -AemAccessToken $token
+            This will return all sites.
     #>
     [CmdletBinding(DefaultParameterSetName = ’AllSites’)]
     Param (
@@ -82,7 +85,7 @@
         If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
         Try {
-            $webResponse = (Invoke-WebRequest @params -ErrorAction Stop).Content
+            $webResponse = (Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop).Content
         }
         Catch {
             $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
@@ -116,7 +119,7 @@
             If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
             Try {
-                $webResponse = (Invoke-WebRequest @params).Content
+                $webResponse = (Invoke-WebRequest -UseBasicParsing @params).Content
             }
             Catch {
                 $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
