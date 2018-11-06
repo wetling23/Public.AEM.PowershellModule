@@ -60,7 +60,7 @@
     # Functions to export from this module
     FunctionsToExport = 'Find-AemSoftwareInstance', 
     'Get-AemDevicesFromSite', 'Get-AemDevices', 'Get-AemSites', 'Get-AemSoftwareList', 'Get-AemUsers',
-    'New-AemApiAccessToken'
+    'New-AemApiAccessToken', 'Set-AemDeviceUDF'
 
     # Cmdlets to export from this module
     CmdletsToExport   = '*'

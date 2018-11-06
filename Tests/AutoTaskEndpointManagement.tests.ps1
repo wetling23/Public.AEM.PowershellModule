@@ -1,5 +1,5 @@
 Get-Module AutoTaskEndpointManagement | Remove-Module -ErrorAction SilentlyContinue
-Import-Module $PSScriptRoot\..\bin\1.0.0.4\AutoTaskEndpointManagement\AutoTaskEndpointManagement.psd1
+Import-Module $PSScriptRoot\..\bin\$(Get-ChildItem -Path $PSScriptRoot\..\bin | Select-Object -Last 1)\AutoTaskEndpointManagement\AutoTaskEndpointManagement.psd1
 . $PSScriptRoot\helpertest.ps1
 
 Describe 'Testing functions for use of -UseBasicParsing' {
