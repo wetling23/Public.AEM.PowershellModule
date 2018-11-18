@@ -1,7 +1,7 @@
 Function Set-AemDeviceUDF {
     <#
         .DESCRIPTION
-            Sets or appends to the user defined feilds of the device 
+            Sets the user defined feilds of the device 
         .NOTES 
             Author: Konstantin Kaminskiy
             V1.0.0.0 date: 5 November 2018
