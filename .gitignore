@@ -1,3 +1,5 @@
 build.ps1
 psake.ps1
+psake-GitHub-PowerShellGallery.ps1
+psake-PowerShellGallery.ps1
 .vs
