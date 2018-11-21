@@ -1,11 +1,14 @@
 Function Set-AemSiteDescription {
     <#
         .DESCRIPTION
-            Sets the description of the AEM site 
-        .NOTES 
+            Sets the description of the AEM site
+        .NOTES
             Author: Konstantin Kaminskiy
             V1.0.0.0 date: 14 November 2018
                 - Initial release.
+            V1.0.0.1 date: 21 November 2018
+                - Updated white space.
+                - Changed Out-Null to $null.
         .PARAMETER AemAccessToken
             Mandatory parameter. Represents the token returned once successful authentication to the API is achieved. Use New-AemApiAccessToken to obtain the token.
         .PARAMETER SiteUid
@@ -21,7 +24,6 @@ Function Set-AemSiteDescription {
         .EXAMPLE
             Set-AemSiteDescription -AemAccessToken $token -SiteUID $SiteUid -Description "The one site to rule them all!"
             This will set the site description to "The one site to rule them all!".
-            
     #>
     [CmdletBinding()]
     Param (
@@ -44,7 +46,7 @@ Function Set-AemSiteDescription {
     Begin {
         If (-NOT($BlockLogging)) {
             $return = Add-EventLogSource -EventLogSource $EventLogSource
-    
+
             If ($return -ne "Success") {
                 $message = ("{0}: Unable to add event source ({1}). No logging will be performed." -f (Get-Date -Format s), $EventLogSource)
                 Write-Host $message -ForegroundColor Yellow;
@@ -57,30 +59,30 @@ Function Set-AemSiteDescription {
         If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
     }
 
-    Process {    
-    # Define parameters for Invoke-WebRequest cmdlet.
-    $Description = @{"description" = "$description";
-                     "name" = (Get-AemSites -AemAccessToken $AemAccessToken -SiteUid $SiteUid -ApiUrl $ApiUrl | 
-                               Select-Object -ExpandProperty name) 
-                    } | ConvertTo-Json
-    $params = @{
-        Uri         = '{0}/api{1}' -f $ApiUrl, "/v2/site/$SiteUid"
-        Method      = 'Post'
-        ContentType = 'application/json'
-        Headers     = @{'Authorization' = 'Bearer {0}' -f $AemAccessToken}
-        Body        = "$Description"
-    }
+    Process {
+        # Define parameters for Invoke-WebRequest cmdlet.
+        $description = @{"description" = "$description";
+            "name"                     = (Get-AemSites -AemAccessToken $AemAccessToken -SiteUid $SiteUid -ApiUrl $ApiUrl |
+                    Select-Object -ExpandProperty name)
+        } | ConvertTo-Json
 
-    $message = ("{0}: Updated `$params hash table. The values are:`n{1}." -f (Get-Date -Format s), (($params | Out-String) -split "`n"))
-    If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
-            
+        $params = @{
+            Uri         = '{0}/api{1}' -f $ApiUrl, "/v2/site/$SiteUid"
+            Method      = 'Post'
+            ContentType = 'application/json'
+            Headers     = @{'Authorization' = 'Bearer {0}' -f $AemAccessToken}
+            Body        = "$description"
+        }
+
+        $message = ("{0}: Updated `$params hash table. The values are:`n{1}." -f (Get-Date -Format s), (($params | Out-String) -split "`n"))
+        If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
         # Make request.
         $message = ("{0}: Making the web request." -f (Get-Date -Format s), $MyInvocation.MyCommand)
         If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
         Try {
-            Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop | Out-Null
+            $null = Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop
         }
         Catch {
             $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
@@ -89,6 +91,5 @@ Function Set-AemSiteDescription {
 
             Return "Error"
         }
-
     }
-} #1.0.0.0
+} #1.0.0.1

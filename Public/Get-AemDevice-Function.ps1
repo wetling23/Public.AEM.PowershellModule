@@ -1,8 +1,8 @@
 ﻿Function Get-AemDevice {
     <#
         .DESCRIPTION
-            Retrieves either individual devices by ID or UID, or all devices from AutoTask Endpoint Management. 
-        .NOTES 
+            Retrieves either individual devices by ID or UID, or all devices from AutoTask Endpoint Management.
+        .NOTES
             Author: Mike Hashemi
             V1.0.0.0 date: 16 June 2018
                 - Initial release.
@@ -15,6 +15,8 @@
                 - Updated white space.
             V1.0.0.4 date: 18 November 2018
                 - Konstantin Kaminskiy renamed to Get-AemDevice, added ability to get device by UID.
+            V1.0.0.5 date: 21 November 2018
+                - Updated white space.
         .PARAMETER AemAccessToken
             Mandatory parameter. Represents the token returned once successful authentication to the API is achieved. Use New-AemApiAccessToken to obtain the token.
         .PARAMETER DeviceId
@@ -31,12 +33,15 @@
             When this switch is included, the code will write output only to the host and will not attempt to write to the Event Log.
         .EXAMPLE
             Get-AemDevice -AemAccessToken $token
-            This will return all devices. 
+
+            This will return all devices.
         .EXAMPLE
             Get-AemDevice -AemAccessToken $token -DeviceId $id
+
             This will return the device matching the specified id.
         .EXAMPLE
             Get-AemDevice -AemAccessToken $token -DeviceUID $UID
+
             This will return the device matching the specified UID.
     #>
     [CmdletBinding(DefaultParameterSetName = ’AllDevices’)]
@@ -78,7 +83,7 @@
 
     Process {
         Switch ($PsCmdlet.ParameterSetName) {
-            {$_ -in ("IDFilter", "AllDevices","UIDFilter")} {
+            {$_ -in ("IDFilter", "AllDevices", "UIDFilter")} {
                 # Define parameters for Invoke-WebRequest cmdlet.
                 $params = @{
                     Uri         = '{0}/api{1}' -f $ApiUrl, "/v2/account/devices"
@@ -139,7 +144,7 @@
                 Uri         = '{0}/api{1}' -f $ApiUrl, $resourcePath
                 Method      = 'GET'
                 ContentType = 'application/json'
-                Headers     = @{'Authorization'	= 'Bearer {0}' -f $AemAccessToken}
+                Headers     = @{'Authorization' = 'Bearer {0}' -f $AemAccessToken}
             }
 
             $message = ("{0}: Making web request for page {1}." -f (Get-Date -Format s), $page.TrimStart("page="))
@@ -158,10 +163,10 @@
 
             $message = ("{0}: Retrieved an additional {1} devices." -f (Get-Date -Format s), (($webResponse|ConvertFrom-Json).devices).count)
             If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
-            
+
             $devices += ($webResponse|ConvertFrom-Json).devices
         }
 
         Return $devices
     }
-} #1.0.0.4
+} #1.0.0.5
