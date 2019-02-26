@@ -8,6 +8,8 @@ Function Get-AemSoftwareList {
             V1.0.0.1 date: 23 August 2018
                 - Updated output.
                 - Fixed bug in setting up the web request parameters.
+            V1.0.0.2 date: 26 February 2019
+                - Fixed bug in call to get RMM device.
         .PARAMETER AemAccessToken
             Mandatory parameter. Represents the token returned once successful authentication to the API is achieved. Use New-AemApiAccessToken to obtain the token.
         .PARAMETER DeviceId
@@ -86,7 +88,7 @@ Function Get-AemSoftwareList {
                 $message = ("{0}: Attempting to retrieve the UID of device {1}." -f (Get-Date -Format s), $DeviceId)
                 If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
-                $DeviceUId = (Get-AemDevices -DeviceId $DeviceId @deviceQueryParams).Uid
+                $DeviceUId = (Get-AemDevice -DeviceId $DeviceId @deviceQueryParams).Uid
             }
         }
 
@@ -123,4 +125,4 @@ Function Get-AemSoftwareList {
             Return "Error"
         }
     }
-} #1.0.0.0
+} #1.0.0.1
