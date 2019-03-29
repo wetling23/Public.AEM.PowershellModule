@@ -5,6 +5,13 @@ Function Find-AemSoftwareInstance {
         .NOTES
             V1.0.0.0 date: 17 August 2018
                 - Initial release.
+            V1.0.0.1 date: 25 March 2019
+                - Added support for rate-limiting response.
+                - Updated loop and properties.
+            V1.0.0.2 date: 28 March 2019
+                - Added support for 403, 401, and 400 responses.
+            V1.0.0.3 date: 29 March 2019
+                - Added support for 404 response.
         .PARAMETER Application
             Represents the name of an application, for which to search.
         .PARAMETER AemAccessToken
@@ -66,10 +73,10 @@ Function Find-AemSoftwareInstance {
         If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
         # Initialize variables.
-        [hashtable]$devicesWithApp = @{}
         [int]$index = 0
+        $http400Devices = @()
 
-        # Setup the parameters for Get-AemDevices.
+        # Setup the parameters for Get-AemDevice.
         If (($PSBoundParameters['Verbose'])) {
             $deviceQueryParams = @{
                 AemAccessToken = $AemAccessToken
@@ -87,13 +94,13 @@ Function Find-AemSoftwareInstance {
             $message = ("{0}: Getting all devices in {1}." -f (Get-Date -Format s), $SiteName)
             If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
-            $allDevices = (Get-AemDevices @deviceQueryParams | Where-Object {($_.siteName -ne 'Deleted Devices') -and ($_.siteName -eq "$SiteName")})
+            $allDevices = (Get-AemDevice @deviceQueryParams | Where-Object {($_.siteName -ne 'Deleted Devices') -and ($_.siteName -eq "$SiteName")})
         }
         Else {
             $message = ("{0}: Getting all devices." -f (Get-Date -Format s), $SiteName)
             If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
-            $allDevices = (Get-AemDevices @deviceQueryParams | Where-Object {$_.siteName -ne 'Deleted Devices'})
+            $allDevices = (Get-AemDevice @deviceQueryParams | Where-Object {$_.siteName -ne 'Deleted Devices'})
         }
 
         If (-NOT($allDevices)) {
@@ -104,8 +111,11 @@ Function Find-AemSoftwareInstance {
         }
 
         Foreach ($device in $alldevices) {
-            $message = ("{0}: Checking for {1} on {2} (device number {3} of {4})." -f (Get-Date -Format s), $Application, $device.hostname, $index, $allDevices.count)
+            $stopLoop = $false
+            $message = ("{0}: Checking for `"{1}`" on {2} (device number {3} of {4})." -f (Get-Date -Format s), $Application, $device.hostname, $index, $allDevices.count)
             If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
+
+            $index++
 
             $params = @{
                 Uri         = '{0}/api{1}' -f $ApiUrl, "/v2/audit/device/$($device.Uid)/software"
@@ -117,37 +127,75 @@ Function Find-AemSoftwareInstance {
             $message = ("{0}: Getting applications installed on {1}." -f (Get-Date -Format s), $device.hostname)
             If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
-            Try {
-                $webrequest = Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop | ConvertFrom-Json
-            }
-            Catch {
-                $message = ("{0}: It appears that the web request failed. The specific error message is: {1}" -f (Get-Date -Format s), $_.Exception.Message)
-                If ($BlockLogging) {Write-Host $message -ForegroundColor Red} Else {Write-Host $message -ForegroundColor Red; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Error -Message $message -EventId 5417}
-            }
+            Do {
+                Try {
+                    $webrequest = Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop | ConvertFrom-Json
 
-            Switch ($webrequest.software.count) {
-                {$_ -gt 0} {
-                    # We have a device with a list of installed software.
-                    If ($webrequest.software.Name -match "$Application") {
-                        $message = ("{0}: Found {1}." -f (Get-Date -Format s), $Application)
-                        If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
+                    $stopLoop = $True
+                }
+                Catch {
+                    If ($_.Exception.Message -match '429') {
+                        $message = ("{0}: Rate limit exceeded, retrying in 60 seconds." -f (Get-Date -Format s))
+                        If ($BlockLogging) {Write-Host $message -ForegroundColor Yellow} Else {Write-Host $message -ForegroundColor Yellow; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Warning -Message $message -EventId 5417}
 
-                        $devicesWithApp.add($device.hostname, $device.siteName)
+                        Start-Sleep -Seconds 60
                     }
+                    ElseIf ($_.Exception.Message -match '403') {
+                        $message = ("{0}: Secret rate limit exceeded, retrying in 60 seconds." -f (Get-Date -Format s))
+                        If ($BlockLogging) {Write-Host $message -ForegroundColor Yellow} Else {Write-Host $message -ForegroundColor Yellow; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Warning -Message $message -EventId 5417}
 
-                    Continue
-                }
-                {$_ -eq 0} {
-                    Write-Host ("{0}: {1} returned no software information." -f (Get-Date -Format s), $device.hostname)
-                    If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Warning -Message $message -EventId 5417}
+                        Start-Sleep -Seconds 60
+                    }
+                    ElseIf ($_.Exception.Message -match '400') {
+                        $message = ("{0}: The remote server returned 400 (Bad Request). This may be caused by a device ({1}) not having any software list." -f (Get-Date -Format s), $device.hostname)
+                        If ($BlockLogging) {Write-Host $message -ForegroundColor Red} Else {Write-Host $message -ForegroundColor Red; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Error -Message $message -EventId 5417}
 
-                    Continue
+                        # I am not doing anything with $http400Devices yet. Perhaps I will write them all out to the logging output (in a group), we'll see.
+                        $http400Devices += $device
+
+                        $stopLoop = $True
+                    }
+                    ElseIf ($_.Exception.Message -match '401') {
+                        $message = ("{0}: The remote server returned 401. It appears that the access token has expired." -f (Get-Date -Format s))
+                        If ($BlockLogging) {Write-Host $message -ForegroundColor Yellow} Else {Write-Host $message -ForegroundColor Yellow; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Warning -Message $message -EventId 5417}
+
+                        Return
+                    }
+                    ElseIf ($_.Exception.Message -match '404') {
+                        $message = ("{0}: The remote server returned 404. It appears that we were unable to locate {1} ({2})." -f (Get-Date -Format s), $device.hostname, $device.id)
+                        If ($BlockLogging) {Write-Host $message -ForegroundColor Yellow} Else {Write-Host $message -ForegroundColor Yellow; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Warning -Message $message -EventId 5417}
+
+                        $stopLoop = $True
+                    }
+                    Else {
+                        $message = ("{0}: It appears that the web request failed (for {1}). The specific error message is: {2}" -f (Get-Date -Format s), $device.hostname, $_.Exception.Message)
+                        If ($BlockLogging) {Write-Host $message -ForegroundColor Red} Else {Write-Host $message -ForegroundColor Red; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Error -Message $message -EventId 5417}
+
+                        Return
+                    }
                 }
             }
+            While ($stopLoop -eq $false)
 
-            $index++
+            # Used "-like" instead of "-match" on purpose.
+            If ($webrequest.software.Name -like "$Application*") {
+                $message = ("{0}: Found `"{1}`"." -f (Get-Date -Format s), $Application)
+                If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
+
+                Foreach ($app in $webrequest.software) {
+                    If ($app.name -Match "$Application") {
+                        $obj = New-Object -TypeName PSObject -Property @{
+                            DeviceName         = $device.hostname
+                            SiteName           = $device.siteName
+                            ApplicationName    = $app.name
+                            ApplicationVersion = $app.version
+                            OperatingSystem    = $device.operatingSystem
+                        }
+
+                        $obj
+                    }
+                }
+            }
         }
-
-        Return $devicesWithApp
     }
-} #1.0.0.0
+} #1.0.0.3
