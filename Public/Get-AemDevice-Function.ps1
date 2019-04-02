@@ -17,6 +17,8 @@
                 - Konstantin Kaminskiy renamed to Get-AemDevice, added ability to get device by UID.
             V1.0.0.5 date: 21 November 2018
                 - Updated white space.
+            V1.0.0.6 date: 25 March 2019
+                - Added support for rate-limiting response.
         .PARAMETER AemAccessToken
             Mandatory parameter. Represents the token returned once successful authentication to the API is achieved. Use New-AemApiAccessToken to obtain the token.
         .PARAMETER DeviceId
@@ -137,6 +139,7 @@
         }
 
         While ((($webResponse | ConvertFrom-Json).pageDetails).nextPageUrl) {
+            $stopLoop = $false
             $page = ((($webResponse | ConvertFrom-Json).pageDetails).nextPageUrl).Split("&")[1]
             $resourcePath = "/v2/account/devices?$page"
 
@@ -150,16 +153,28 @@
             $message = ("{0}: Making web request for page {1}." -f (Get-Date -Format s), $page.TrimStart("page="))
             If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
 
-            Try {
-                $webResponse = (Invoke-WebRequest @params -UseBasicParsing).Content
-            }
-            Catch {
-                $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
-                        -f (Get-Date -Format s), $MyInvocation.MyCommand, $_.Exception.Message)
-                If ($BlockLogging) {Write-Host $message -ForegroundColor Red} Else {Write-Host $message -ForegroundColor Red; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Error -Message $message -EventId 5417}
+            Do {
+                Try {
+                    $webResponse = (Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop).Content
 
-                Return "Error"
+                    $stopLoop = $True
+                }
+                Catch {
+                    If ($_.Exception.Message -match '429') {
+                        $message = ("{0}: Rate limit exceeded, retrying in 60 seconds." -f (Get-Date -Format s))
+                        If ($BlockLogging) {Write-Host $message -ForegroundColor Yellow} Else {Write-Host $message -ForegroundColor Yellow; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Warning -Message $message -EventId 5417}
+
+                        Start-Sleep -Seconds 60
+                    }
+                    Else {
+                        $message = ("{0}: It appears that the web request failed. The specific error message is: {1}" -f (Get-Date -Format s), $_.Exception.Message)
+                        If ($BlockLogging) {Write-Host $message -ForegroundColor Red} Else {Write-Host $message -ForegroundColor Red; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Error -Message $message -EventId 5417}
+
+                        Return
+                    }
+                }
             }
+            While ($stopLoop -eq $false)
 
             $message = ("{0}: Retrieved an additional {1} devices." -f (Get-Date -Format s), (($webResponse|ConvertFrom-Json).devices).count)
             If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
