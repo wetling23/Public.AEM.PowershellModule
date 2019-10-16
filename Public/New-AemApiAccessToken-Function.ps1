@@ -14,7 +14,8 @@
                 - Fixed output bug. The -BlockLogging parameter was blocking all output.
                 - Updated white space.
             V1.0.0.3 date: 27 October 2018 - by Konstantin Kaminskiy
-                - Adjusted returned data to include only the access token itself to increase ease of use
+                - Adjusted returned data to include only the access token itself to increase ease of use.
+            V1.0.0.4 date: 16 October 2019
         .LINK
         .PARAMETER ApiKey
             Mandatory parameter. Represents the API key to AEM's REST API.
@@ -27,10 +28,10 @@
         .PARAMETER BlockLogging
             When this switch is included, the code will write output only to the host and will not attempt to write to the Event Log.
         .EXAMPLE
-            .\New-AemApiAccessToken -ApiKey XXXXXXXXXXXXXXXXXXXX -ApiSecretKey XXXXXXXXXXXXXXXXXXXX
+            .\New-AemApiAccessToken -ApiKey XXXXXXXXXXXXXXXXXXXX -ApiSecretKey XXXXXXXXXXXXXXXXXXXX | ConvertTo-SecureString -AsPlainText -Force
         .EXAMPLE
-            $token = New-AemApiAccessToken -ApiKey XXXXXXXXXXXXXXXXXXXX -ApiSecretKey XXXXXXXXXXXXXXXXXXXX
-            Store your token in a variable for later use and re-use. 
+            $token = New-AemApiAccessToken -ApiKey XXXXXXXXXXXXXXXXXXXX -ApiSecretKey XXXXXXXXXXXXXXXXXXXX | ConvertTo-SecureString -AsPlainText -Force
+            Store your token in a variable for later use and re-use.
     #>
     [CmdletBinding()]
     param (
@@ -38,8 +39,8 @@
         [string]$ApiKey,
 
         [Parameter(Mandatory = $True)]
-        [string]$ApiSecretKey,
-        
+        [securestring]$ApiSecretKey,
+
         [string]$ApiUrl = 'https://zinfandel-api.centrastage.net',
 
         [string]$EventLogSource = 'AemPowerShellModule',
@@ -52,15 +53,15 @@
         $return = Add-EventLogSource -EventLogSource $EventLogSource
 
         If ($return -ne "Success") {
-            $message = ("{0}: Unable to add event source ({1}). No logging will be performed." -f (Get-Date -Format s), $EventLogSource)
+            $message = ("{0}: Unable to add event source ({1}). No logging will be performed." -f [datetime]::Now, $EventLogSource)
             Write-Host $message -ForegroundColor Yellow;
 
             $BlockLogging = $True
         }
     }
 
-    $message = ("{0}: Beginning {1}." -f (Get-Date -Format s), $MyInvocation.MyCommand)
-    If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
+    $message = ("{0}: Beginning {1}." -f [datetime]::Now, $MyInvocation.MyCommand)
+    If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) { Write-Verbose $message } ElseIf ($PSBoundParameters['Verbose']) { Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417 }
 
     # Specify security protocols.
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]'Tls11,Tls12'
@@ -74,11 +75,11 @@
         Uri         = '{0}/auth/oauth/token' -f $ApiUrl
         Method      = 'POST'
         ContentType = 'application/x-www-form-urlencoded'
-        Body        = 'grant_type=password&username={0}&password={1}' -f $ApiKey, $ApiSecretKey
+        Body        = 'grant_type=password&username={0}&password={1}' -f $ApiKey, [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($ApiSecretKey))
     }
 
-    $message = ("{0}: Requesting a bearer token from AutoTask." -f (Get-Date -Format s), $MyInvocation.MyCommand)
-    If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
+    $message = ("{0}: Requesting a bearer token from AutoTask." -f [datetime]::Now, $MyInvocation.MyCommand)
+    If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) { Write-Verbose $message } ElseIf ($PSBoundParameters['Verbose']) { Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417 }
 
     # Request access token.
     Try {
@@ -86,8 +87,8 @@
     }
     Catch {
         $message = ("{0}: Unexpected error generating an authorization token. To prevent errors, {1} will exit. The specific error message is: {2}" `
-                -f (Get-Date -Format s), $MyInvocation.MyCommand, $_.Exception.Message)
-        If ($BlockLogging) {Write-Host $message -ForegroundColor Red} Else {Write-Host $message -ForegroundColor Red; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Error -Message $message -EventId 5417}
+                -f [datetime]::Now, $MyInvocation.MyCommand, $_.Exception.Message)
+        If ($BlockLogging) { Write-Host $message -ForegroundColor Red } Else { Write-Host $message -ForegroundColor Red; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Error -Message $message -EventId 5417 }
 
         Return "Error"
     }
@@ -98,4 +99,4 @@
     Else {
         Return "Error"
     }
-} #1.0.0.2
+} #1.0.0.4

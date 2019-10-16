@@ -19,6 +19,8 @@
                 - Updated white space.
             V1.0.0.6 date: 25 March 2019
                 - Added support for rate-limiting response.
+            V1.0.0.7 date: 8 April 2019
+                - Added alias for Get-AemDevices.
         .PARAMETER AemAccessToken
             Mandatory parameter. Represents the token returned once successful authentication to the API is achieved. Use New-AemApiAccessToken to obtain the token.
         .PARAMETER DeviceId
@@ -46,7 +48,8 @@
 
             This will return the device matching the specified UID.
     #>
-    [CmdletBinding(DefaultParameterSetName = ’AllDevices’)]
+    [CmdletBinding(DefaultParameterSetName = 'AllDevices')]
+    [alias('Get-LogicMonitorDevices')]
     Param (
         [Parameter(Mandatory = $True, ValueFromPipeline = $true)]
         [Parameter(ParameterSetName = 'AllDevices')]
@@ -184,4 +187,4 @@
 
         Return $devices
     }
-} #1.0.0.5
+} #1.0.0.7
