@@ -6,6 +6,7 @@
             Author: Mike Hashemi
             V1.0.0.0 date: 24 October 2019
                 - Initial release.
+            V1.0.0.1 date: 29 October 2019
         .PARAMETER AemAccessToken
             Mandatory parameter. Represents the token returned once successful authentication to the API is achieved. Use New-AemApiAccessToken to obtain the token.
         .PARAMETER DeviceUID
@@ -94,6 +95,7 @@
         If (($BlockLogging) -AND (($PSBoundParameters['Verbose']) -or $VerbosePreference -eq 'Continue')) { Write-Verbose $message } ElseIf (($PSBoundParameters['Verbose']) -or ($VerbosePreference -eq 'Continue')) { Write-Verbose $message; Write-EventLog -LogName Application -Source $EventLogSource -EntryType Information -Message $message -EventId 5417 }
 
         # Initialize variables.
+        $inputVariables = @()
         $params = @{
             Uri         = '{0}/api{1}' -f $ApiUrl, "/v2/device/$DeviceUID/quickjob"
             Method      = 'PUT'
@@ -115,7 +117,11 @@
             $message = ("{0}: One or more component variables were provided, updating the request body." -f [datetime]::Now)
             If (($BlockLogging) -AND (($PSBoundParameters['Verbose']) -or $VerbosePreference -eq 'Continue')) { Write-Verbose $message } ElseIf (($PSBoundParameters['Verbose']) -or ($VerbosePreference -eq 'Continue')) { Write-Verbose $message; Write-EventLog -LogName Application -Source $EventLogSource -EntryType Information -Message $message -EventId 5417 }
 
-            $apiRequestBody.jobComponent.Add('variables', @($Variables))
+            Foreach ($var in $a.GetEnumerator()) {
+                $inputVariables += @{name = $var.name; value = $var.value }
+            }
+
+            $apiRequestBody.jobComponent.Add('variables', @($inputVariables))
         }
 
         $params.Add('Body', ($apiRequestBody | ConvertTo-Json -Depth 5))
@@ -135,4 +141,4 @@
 
         ($webResponse | ConvertFrom-Json).Job
     }
-} #1.0.0.0
+} #1.0.0.1
