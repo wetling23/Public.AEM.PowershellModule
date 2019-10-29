@@ -1,7 +1,7 @@
 ﻿Function Start-AemQuickJob {
     <#
         .DESCRIPTION
-            
+            Accepts a device unique ID and a component unique ID to trigger the quick job to run.
         .NOTES
             Author: Mike Hashemi
             V1.0.0.0 date: 24 October 2019
@@ -110,6 +110,7 @@
                 componentUid = $ComponentGuid
             }
         }
+
         If ($Variables) {
             $message = ("{0}: One or more component variables were provided, updating the request body." -f [datetime]::Now)
             If (($BlockLogging) -AND (($PSBoundParameters['Verbose']) -or $VerbosePreference -eq 'Continue')) { Write-Verbose $message } ElseIf (($PSBoundParameters['Verbose']) -or ($VerbosePreference -eq 'Continue')) { Write-Verbose $message; Write-EventLog -LogName Application -Source $EventLogSource -EntryType Information -Message $message -EventId 5417 }
