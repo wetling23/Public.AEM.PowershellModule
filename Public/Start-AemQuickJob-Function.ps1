@@ -7,6 +7,7 @@
             V1.0.0.0 date: 24 October 2019
                 - Initial release.
             V1.0.0.1 date: 29 October 2019
+            V1.0.0.2 date: 30 October 2019
         .PARAMETER AemAccessToken
             Mandatory parameter. Represents the token returned once successful authentication to the API is achieved. Use New-AemApiAccessToken to obtain the token.
         .PARAMETER DeviceUID
@@ -117,7 +118,7 @@
             $message = ("{0}: One or more component variables were provided, updating the request body." -f [datetime]::Now)
             If (($BlockLogging) -AND (($PSBoundParameters['Verbose']) -or $VerbosePreference -eq 'Continue')) { Write-Verbose $message } ElseIf (($PSBoundParameters['Verbose']) -or ($VerbosePreference -eq 'Continue')) { Write-Verbose $message; Write-EventLog -LogName Application -Source $EventLogSource -EntryType Information -Message $message -EventId 5417 }
 
-            Foreach ($var in $a.GetEnumerator()) {
+            Foreach ($var in $Variables.GetEnumerator()) {
                 $inputVariables += @{name = $var.name; value = $var.value }
             }
 
@@ -141,4 +142,4 @@
 
         ($webResponse | ConvertFrom-Json).Job
     }
-} #1.0.0.1
+} #1.0.0.2
