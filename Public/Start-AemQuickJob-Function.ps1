@@ -119,7 +119,10 @@
             If (($BlockLogging) -AND (($PSBoundParameters['Verbose']) -or $VerbosePreference -eq 'Continue')) { Write-Verbose $message } ElseIf (($PSBoundParameters['Verbose']) -or ($VerbosePreference -eq 'Continue')) { Write-Verbose $message; Write-EventLog -LogName Application -Source $EventLogSource -EntryType Information -Message $message -EventId 5417 }
 
             Foreach ($var in $Variables.GetEnumerator()) {
-                $inputVariables += @{name = $var.name; value = $var.value }
+                $message = ("{0}: Adding {1}." -f [datetime]::Now, $var.Name)
+                If (($BlockLogging) -AND (($PSBoundParameters['Verbose']) -or $VerbosePreference -eq 'Continue')) { Write-Verbose $message } ElseIf (($PSBoundParameters['Verbose']) -or ($VerbosePreference -eq 'Continue')) { Write-Verbose $message; Write-EventLog -LogName Application -Source $EventLogSource -EntryType Information -Message $message -EventId 5417 }
+
+                $inputVariables += @{name = $var.Name; value = $var.Value }
             }
 
             $apiRequestBody.jobComponent.Add('variables', @($inputVariables))
