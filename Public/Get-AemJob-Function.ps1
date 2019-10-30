@@ -67,7 +67,7 @@
 
     Process {
         $message = ("{0}: Beginning {1}." -f [datetime]::Now, $MyInvocation.MyCommand)
-        If ($BlockLogging) { Write-Host $message } Else { Write-Host $message; Write-EventLog -LogName Application -Source $EventLogSource -EntryType Information -Message $message -EventId 5417 }
+        If (($BlockLogging) -AND (($PSBoundParameters['Verbose']) -or $VerbosePreference -eq 'Continue')) { Write-Verbose $message } ElseIf (($PSBoundParameters['Verbose']) -or ($VerbosePreference -eq 'Continue')) { Write-Verbose $message; Write-EventLog -LogName Application -Source $EventLogSource -EntryType Information -Message $message -EventId 5417 }
 
         # Initialize variables.
         $params = @{
