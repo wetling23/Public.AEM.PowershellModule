@@ -70,6 +70,11 @@ Function Set-AemSiteDescription {
                     ApiUrl      = $ApiUrl
                 }
             }
+            Else {
+                $commandParams = @{
+                    Verbose = $true
+                }
+            }
         }
         Else {
             If ($EventLogSource -and (-NOT $LogPath)) {

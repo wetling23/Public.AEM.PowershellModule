@@ -88,6 +88,11 @@ Function Find-AemSoftwareInstance {
                     ApiUrl      = $ApiUrl
                 }
             }
+            Else {
+                $commandParams = @{
+                    Verbose = $true
+                }
+            }
         }
         Else {
             If ($EventLogSource -and (-NOT $LogPath)) {
