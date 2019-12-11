@@ -1,4 +1,4 @@
-﻿Function Get-AemSites {
+﻿Function Get-AemSite {
     <#
         .DESCRIPTION
             Retrieves either individual or all sites from AutoTask Endpoint Management. 
@@ -29,7 +29,8 @@
             Get-AemSites -AccessToken $token -Verbose
             This will return all sites. Verbose output is sent to the host.
     #>
-    [CmdletBinding(DefaultParameterSetName = ’AllSites’)]
+    [CmdletBinding(DefaultParameterSetName = 'AllSites')]
+    [alias('Get-AemSite')]
     Param (
         [Parameter(Mandatory = $True)]
         [Parameter(ParameterSetName = 'AllSites')]
@@ -37,7 +38,7 @@
         [Alias("AemAccessToken")]
         [string]$AccessToken,
 
-        [Parameter(Mandatory = $True, ParameterSetName = ’IDFilter’)]
+        [Parameter(Mandatory = $True, ParameterSetName = 'IDFilter')]
         [string]$SiteUid,
 
         [string]$ApiUrl = 'https://zinfandel-api.centrastage.net',

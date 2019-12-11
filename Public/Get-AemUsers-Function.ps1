@@ -1,4 +1,4 @@
-﻿Function Get-AemUsers {
+﻿Function Get-AemUser {
     <#
         .DESCRIPTION
             Retrieves all users from AutoTask Endpoint Management.
@@ -24,6 +24,7 @@
             This example returns an array of all AEM users and their properties. Verbose output is sent to the host.
     #>
     [CmdletBinding()]
+    [alias('Get-AemUsers')]
     Param (
         [Parameter(Mandatory = $True, ValueFromPipeline = $true)]
         [Alias("AemAccessToken")]
