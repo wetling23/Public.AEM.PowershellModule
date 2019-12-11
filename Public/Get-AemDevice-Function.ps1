@@ -21,7 +21,11 @@
                 - Added support for rate-limiting response.
             V1.0.0.7 date: 8 April 2019
                 - Added alias for Get-AemDevices.
-        .PARAMETER AemAccessToken
+            V1.0.0.8 date: 5 December 2019
+            V1.0.0.9 date: 11 December 2019
+        .LINK
+            https://github.com/wetling23/Public.AEM.PowershellModule
+        .PARAMETER AccessToken
             Mandatory parameter. Represents the token returned once successful authentication to the API is achieved. Use New-AemApiAccessToken to obtain the token.
         .PARAMETER DeviceId
             Represents the ID number (e.g. 23423) of the desired device.
@@ -36,15 +40,15 @@
         .PARAMETER BlockLogging
             When this switch is included, the code will write output only to the host and will not attempt to write to the Event Log.
         .EXAMPLE
-            Get-AemDevice -AemAccessToken $token
+            Get-AemDevice -AccessToken $token -Verbose
 
-            This will return all devices.
+            This will return all devices. Verbose output is sent to the host.
         .EXAMPLE
-            Get-AemDevice -AemAccessToken $token -DeviceId $id
+            Get-AemDevice -AccessToken $token -DeviceId $id
 
             This will return the device matching the specified id.
         .EXAMPLE
-            Get-AemDevice -AemAccessToken $token -DeviceUID $UID
+            Get-AemDevice -AccessToken $token -DeviceUID $UID
 
             This will return the device matching the specified UID.
     #>
@@ -55,7 +59,8 @@
         [Parameter(ParameterSetName = 'AllDevices')]
         [Parameter(ParameterSetName = 'IDFilter')]
         [Parameter(ParameterSetName = 'UIDFilter')]
-        [string]$AemAccessToken,
+        [Alias("AemAccessToken")]
+        [string]$AccessToken,
 
         [Parameter(Mandatory = $false, ParameterSetName = 'IDFilter')]
         [int]$DeviceId,
@@ -65,66 +70,55 @@
 
         [string]$ApiUrl = 'https://zinfandel-api.centrastage.net',
 
-        [string]$EventLogSource = 'AemPowerShellModule',
+        [string]$EventLogSource,
 
-        [switch]$BlockLogging
+        [string]$LogPath
     )
 
     Begin {
-        If (-NOT($BlockLogging)) {
-            $return = Add-EventLogSource -EventLogSource $EventLogSource
-
-            If ($return -ne "Success") {
-                $message = ("{0}: Unable to add event source ({1}). No logging will be performed." -f (Get-Date -Format s), $EventLogSource)
-                Write-Host $message -ForegroundColor Yellow;
-
-                $BlockLogging = $True
-            }
-        }
-
-        $message = ("{0}: Beginning {1}." -f (Get-Date -Format s), $MyInvocation.MyCommand)
-        If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
+        $message = ("{0}: Beginning {1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), $MyInvocation.MyCommand)
+        If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
     }
 
     Process {
         Switch ($PsCmdlet.ParameterSetName) {
-            {$_ -in ("IDFilter", "AllDevices", "UIDFilter")} {
+            { $_ -in ("IDFilter", "AllDevices", "UIDFilter") } {
                 # Define parameters for Invoke-WebRequest cmdlet.
                 $params = @{
                     Uri         = '{0}/api{1}' -f $ApiUrl, "/v2/account/devices"
                     Method      = 'GET'
                     ContentType = 'application/json'
-                    Headers     = @{'Authorization' = 'Bearer {0}' -f $AemAccessToken}
+                    Headers     = @{'Authorization' = 'Bearer {0}' -f $AccessToken }
                 }
 
-                $message = ("{0}: Updated `$params hash table. The values are:`n{1}." -f (Get-Date -Format s), (($params | Out-String) -split "`n"))
-                If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
+                $message = ("{0}: Updated `$params hash table. The values are:`n{1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), (($params | Out-String) -split "`n"))
+                If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
             }
             "IDFilter" {
                 $params.set_item("Uri", "$(($params.Uri).TrimEnd("/account/devices")+"/device/id/$DeviceId")")
 
-                $message = ("{0}: Updated `$params hash table (Uri key). The values are:`n{1}." -f (Get-Date -Format s), (($params | Out-String) -split "`n"))
-                If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
+                $message = ("{0}: Updated `$params hash table (Uri key). The values are:`n{1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), (($params | Out-String) -split "`n"))
+                If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
             }
             "UIDFilter" {
                 $params.set_item("Uri", "$(($params.Uri).TrimEnd("/account/devices")+"/device/$DeviceUID")")
 
-                $message = ("{0}: Updated `$params hash table (Uri key). The values are:`n{1}." -f (Get-Date -Format s), (($params | Out-String) -split "`n"))
-                If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
+                $message = ("{0}: Updated `$params hash table (Uri key). The values are:`n{1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), (($params | Out-String) -split "`n"))
+                If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
             }
         }
 
         # Make request.
-        $message = ("{0}: Making the first web request." -f (Get-Date -Format s), $MyInvocation.MyCommand)
-        If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
+        $message = ("{0}: Making the first web request." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), $MyInvocation.MyCommand)
+        If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
 
         Try {
             $webResponse = (Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop).Content
         }
         Catch {
             $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
-                    -f (Get-Date -Format s), $MyInvocation.MyCommand, $_.Exception.Message)
-            If ($BlockLogging) {Write-Host $message -ForegroundColor Red} Else {Write-Host $message -ForegroundColor Red; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Error -Message $message -EventId 5417}
+                    -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), $MyInvocation.MyCommand, $_.Exception.Message)
+            If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Error -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Error -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Error -Message $message }
 
             Return "Error"
         }
@@ -150,11 +144,11 @@
                 Uri         = '{0}/api{1}' -f $ApiUrl, $resourcePath
                 Method      = 'GET'
                 ContentType = 'application/json'
-                Headers     = @{'Authorization' = 'Bearer {0}' -f $AemAccessToken}
+                Headers     = @{'Authorization' = 'Bearer {0}' -f $AccessToken }
             }
 
-            $message = ("{0}: Making web request for page {1}." -f (Get-Date -Format s), $page.TrimStart("page="))
-            If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
+            $message = ("{0}: Making web request for page {1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), $page.TrimStart("page="))
+            If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
 
             Do {
                 Try {
@@ -164,14 +158,14 @@
                 }
                 Catch {
                     If ($_.Exception.Message -match '429') {
-                        $message = ("{0}: Rate limit exceeded, retrying in 60 seconds." -f (Get-Date -Format s))
-                        If ($BlockLogging) {Write-Host $message -ForegroundColor Yellow} Else {Write-Host $message -ForegroundColor Yellow; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Warning -Message $message -EventId 5417}
+                        $message = ("{0}: Rate limit exceeded, retrying in 60 seconds." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"))
+                        If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Error -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Error -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Error -Message $message }
 
                         Start-Sleep -Seconds 60
                     }
                     Else {
-                        $message = ("{0}: It appears that the web request failed. The specific error message is: {1}" -f (Get-Date -Format s), $_.Exception.Message)
-                        If ($BlockLogging) {Write-Host $message -ForegroundColor Red} Else {Write-Host $message -ForegroundColor Red; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Error -Message $message -EventId 5417}
+                        $message = ("{0}: It appears that the web request failed. The specific error message is: {1}" -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), $_.Exception.Message)
+                        If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Error -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Error -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Error -Message $message }
 
                         Return
                     }
@@ -179,12 +173,12 @@
             }
             While ($stopLoop -eq $false)
 
-            $message = ("{0}: Retrieved an additional {1} devices." -f (Get-Date -Format s), (($webResponse|ConvertFrom-Json).devices).count)
-            If (($BlockLogging) -AND ($PSBoundParameters['Verbose'])) {Write-Verbose $message} ElseIf ($PSBoundParameters['Verbose']) {Write-Verbose $message; Write-EventLog -LogName Application -Source $eventLogSource -EntryType Information -Message $message -EventId 5417}
+            $message = ("{0}: Retrieved an additional {1} devices." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), (($webResponse | ConvertFrom-Json).devices).count)
+            If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
 
-            $devices += ($webResponse|ConvertFrom-Json).devices
+            $devices += ($webResponse | ConvertFrom-Json).devices
         }
 
         Return $devices
     }
-} #1.0.0.7
+} #1.0.0.9
