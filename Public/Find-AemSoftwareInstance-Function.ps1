@@ -71,15 +71,44 @@ Function Find-AemSoftwareInstance {
         $http400Devices = @()
 
         # Setup the parameters for Get-AemDevice.
-        If (($PSBoundParameters['Verbose'])) {
-            $deviceQueryParams = @{
-                AccessToken = $AccessToken
-                Verbose     = $True
+        If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') {
+            If ($EventLogSource -and (-NOT $LogPath)) {
+                $commandParams = @{
+                    Verbose        = $true
+                    EventLogSource = $EventLogSource
+                    AccessToken    = $AccessToken
+                    ApiUrl         = $ApiUrl
+                }
+            }
+            ElseIf ($LogPath -and (-NOT $EventLogSource)) {
+                $commandParams = @{
+                    Verbose = $true
+                    LogPath = $LogPath
+                    AccessToken = $AccessToken
+                    ApiUrl      = $ApiUrl
+                }
             }
         }
         Else {
-            $deviceQueryParams = @{
-                AccessToken = $AccessToken
+            If ($EventLogSource -and (-NOT $LogPath)) {
+                $commandParams = @{
+                    EventLogSource = $EventLogSource
+                    AccessToken    = $AccessToken
+                    ApiUrl         = $ApiUrl
+                }
+            }
+            ElseIf ($LogPath -and (-NOT $EventLogSource)) {
+                $commandParams = @{
+                    LogPath     = $LogPath
+                    AccessToken = $AccessToken
+                    ApiUrl      = $ApiUrl
+                }
+            }
+            Else {
+                $commandParams = @{
+                    AccessToken = $AccessToken
+                    ApiUrl      = $ApiUrl
+                }
             }
         }
 
@@ -88,13 +117,13 @@ Function Find-AemSoftwareInstance {
             $message = ("{0}: Getting all devices in {1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), $SiteName)
             If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
 
-            $allDevices = (Get-AemDevice @deviceQueryParams | Where-Object { ($_.siteName -ne 'Deleted Devices') -and ($_.siteName -eq "$SiteName") })
+            $allDevices = (Get-AemDevice @commandParams | Where-Object { ($_.siteName -ne 'Deleted Devices') -and ($_.siteName -eq "$SiteName") })
         }
         Else {
             $message = ("{0}: Getting all devices." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), $SiteName)
             If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
 
-            $allDevices = (Get-AemDevice @deviceQueryParams | Where-Object { $_.siteName -ne 'Deleted Devices' })
+            $allDevices = (Get-AemDevice @commandParams | Where-Object { $_.siteName -ne 'Deleted Devices' })
         }
 
         If (-NOT($allDevices)) {

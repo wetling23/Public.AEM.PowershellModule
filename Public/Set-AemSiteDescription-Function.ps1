@@ -51,13 +51,55 @@ Function Set-AemSiteDescription {
     Begin {
         $message = ("{0}: Beginning {1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), $MyInvocation.MyCommand)
         If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
+
+        # Setup the parameters for Get-AemDevice.
+        If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') {
+            If ($EventLogSource -and (-NOT $LogPath)) {
+                $commandParams = @{
+                    Verbose        = $true
+                    EventLogSource = $EventLogSource
+                    AccessToken    = $AccessToken
+                    ApiUrl         = $ApiUrl
+                }
+            }
+            ElseIf ($LogPath -and (-NOT $EventLogSource)) {
+                $commandParams = @{
+                    Verbose     = $true
+                    LogPath     = $LogPath
+                    AccessToken = $AccessToken
+                    ApiUrl      = $ApiUrl
+                }
+            }
+        }
+        Else {
+            If ($EventLogSource -and (-NOT $LogPath)) {
+                $commandParams = @{
+                    EventLogSource = $EventLogSource
+                    AccessToken    = $AccessToken
+                    ApiUrl         = $ApiUrl
+                }
+            }
+            ElseIf ($LogPath -and (-NOT $EventLogSource)) {
+                $commandParams = @{
+                    LogPath     = $LogPath
+                    AccessToken = $AccessToken
+                    ApiUrl      = $ApiUrl
+                }
+            }
+            Else {
+                $commandParams = @{
+                    AccessToken = $AccessToken
+                    ApiUrl      = $ApiUrl
+                }
+            }
+        }
     }
 
     Process {
         # Define parameters for Invoke-WebRequest cmdlet.
-        $description = @{"description" = "$description";
-            "name"                     = (Get-AemSites -AccessToken $AccessToken -SiteUid $SiteUid -ApiUrl $ApiUrl |
-                Select-Object -ExpandProperty name)
+        $description = @{
+            "description" = "$description"
+            "name"        = (Get-AemSites -SiteUid $SiteUid @commandParams | Select-Object -ExpandProperty name)
         } | ConvertTo-Json
 
         $params = @{
