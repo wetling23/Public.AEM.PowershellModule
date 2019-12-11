@@ -29,15 +29,15 @@ Function Find-AemSoftwareInstance {
         .PARAMETER LogPath
             When included (when EventLogSource is null), represents the file, to which the cmdlet will output will be logged. If no path or event log source are provided, output is sent only to the host.
         .EXAMPLE
-            PS C:\> Find-AemApplicationInstance -Application "CentraStage" -AccessToken <token> -Verbose
+            PS C:\> Find-AemSoftwareInstance -Application "CentraStage" -AccessToken <token> -Verbose
 
             In this example, the function will search the audit data of devices in all sites (except Deleted Devices), for CentraStage. Output will be written to the event log and host. Verbose output is sent to the host.
         .EXAMPLE
-            PS C:\> Find-AemApplicationInstance -Application "CentraStage" -AccessToken <token> -SiteName <site name>
+            PS C:\> Find-AemSoftwareInstance -Application "CentraStage" -AccessToken <token> -SiteName <site name>
 
             In this example, the function will search the audit data of devices in <site name> for CentraStage. Output will be written to the event log and host
         .EXAMPLE
-            PS C:\> Find-AemApplicationInstance -Application "CentraStage" -AccessToken <token> -ApiUrl https://merlot.centrastage.net -BlockLogging
+            PS C:\> Find-AemSoftwareInstance -Application "CentraStage" -AccessToken <token> -ApiUrl https://merlot.centrastage.net -BlockLogging
 
             In this example, the function will search the audit data of devices in all sites (except Deleted Devices), for CentraStage. Output will be written to the event log and host.
             In this example, the AEM instance is located in the "merlot" region.
