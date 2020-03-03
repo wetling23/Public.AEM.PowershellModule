@@ -13,6 +13,7 @@
                 - Changed parameter name from SiteId to SiteUid for clarity.
             V1.0.0.3 date: 5 December 2019
             V1.0.0.4 date: 11 December 2019
+            V1.0.0.5 date: 3 March 2020
         .LINK
             https://github.com/wetling23/Public.AEM.PowershellModule
         .PARAMETER AccessToken
@@ -30,7 +31,7 @@
             This will return all sites. Verbose output is sent to the host.
     #>
     [CmdletBinding(DefaultParameterSetName = 'AllSites')]
-    [alias('Get-AemSite')]
+    [alias('Get-AemSites')]
     Param (
         [Parameter(Mandatory = $True)]
         [Parameter(ParameterSetName = 'AllSites')]
@@ -132,4 +133,4 @@
 
         Return $sites
     }
-} #1.0.0.4
+} #1.0.0.5
