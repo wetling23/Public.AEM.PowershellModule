@@ -383,6 +383,10 @@ Function Get-AemDevice {
         $message = ("{0}: Operating in the {1} parameter set." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), $PsCmdlet.ParameterSetName)
         If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
 
+        # Initialize variables.
+        $devices = $null
+        $loopCount = 0
+
         Switch ($PsCmdlet.ParameterSetName) {
             { $_ -in ("IDFilter", "AllDevices", "UIDFilter", "SiteFilter") } {
                 # Define parameters for Invoke-WebRequest cmdlet.
@@ -393,25 +397,25 @@ Function Get-AemDevice {
                     Headers     = @{'Authorization' = 'Bearer {0}' -f $AccessToken }
                 }
 
-                $message = ("{0}: Updated `$params hash table. The values are:`n{1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), (($params | Out-String) -split "`n"))
+                $message = ("{0}: Updated `$params hash table. The values are:`n{1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), ($params | Out-String))
                 If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
             }
             "IDFilter" {
                 $params.set_item("Uri", "$(($params.Uri).TrimEnd("/account/devices")+"/device/id/$DeviceId")")
 
-                $message = ("{0}: Updated `$params hash table (Uri key). The values are:`n{1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), (($params | Out-String) -split "`n"))
+                $message = ("{0}: Updated `$params hash table (Uri key). The values are:`n{1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), ($params | Out-String))
                 If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
             }
             "UIDFilter" {
                 $params.set_item("Uri", "$(($params.Uri).TrimEnd("/account/devices")+"/device/$DeviceUID")")
 
-                $message = ("{0}: Updated `$params hash table (Uri key). The values are:`n{1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), (($params | Out-String) -split "`n"))
+                $message = ("{0}: Updated `$params hash table (Uri key). The values are:`n{1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), ($params | Out-String))
                 If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
             }
             "SiteFilter" {
                 $params.set_item("Uri", "$(($params.Uri).TrimEnd("/account/devices")+"/site/$SiteUID/devices")")
 
-                $message = ("{0}: Updated `$params hash table (Uri key). The values are:`n{1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), (($params | Out-String) -split "`n"))
+                $message = ("{0}: Updated `$params hash table (Uri key). The values are:`n{1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), ($params | Out-String))
                 If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
             }
         }
@@ -421,14 +425,7 @@ Function Get-AemDevice {
         If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
 
         Try {
-            Switch ($PsCmdlet.ParameterSetName) {
-                { $_ -in ("IDFilter", "AllDevices", "UIDFilter") } {
-                    $webResponse = (Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop).Content
-                }
-                "SiteFilter" {
-                    $webResponse = Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop
-                }
-            }
+            $webResponse = (Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop).Content
         }
         Catch {
             $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
@@ -439,17 +436,11 @@ Function Get-AemDevice {
         }
 
         Switch ($PsCmdlet.ParameterSetName) {
-            "AllDevices" {
+            { $_ -in ("AllDevices", "SiteFilter") } {
                 $devices = ($webResponse | ConvertFrom-Json).devices
             }
-            "IDFilter" {
+            { $_ -in ("IDFilter", "UIDFilter") } {
                 $devices = ($webResponse | ConvertFrom-Json)
-            }
-            "UIDFilter" {
-                $devices = ($webResponse | ConvertFrom-Json)
-            }
-            "SiteFilter" {
-                $devices = ($webResponse | ConvertFrom-Json).devices
             }
         }
 
@@ -457,7 +448,7 @@ Function Get-AemDevice {
             $stopLoop = $false
             $page = ((($webResponse | ConvertFrom-Json).pageDetails).nextPageUrl).Split("&")[1]
 
-            If ($PsCmdlet.ParameterSetName -eq "SiteFilter") {
+            If ($PsCmdlet.ParameterSetName -ne "SiteFilter") {
                 $resourcePath = "/v2/account/devices?$page"
             }
             Else {
