@@ -23,6 +23,7 @@
                 - Added alias for Get-AemDevices.
             V1.0.0.8 date: 5 December 2019
             V1.0.0.9 date: 11 December 2019
+            V1.0.0.10 date: 16 March 2020
         .LINK
             https://github.com/wetling23/Public.AEM.PowershellModule
         .PARAMETER AccessToken
@@ -56,9 +57,6 @@
     [alias('Get-LogicMonitorDevices')]
     Param (
         [Parameter(Mandatory = $True, ValueFromPipeline = $true)]
-        [Parameter(ParameterSetName = 'AllDevices')]
-        [Parameter(ParameterSetName = 'IDFilter')]
-        [Parameter(ParameterSetName = 'UIDFilter')]
         [Alias("AemAccessToken")]
         [string]$AccessToken,
 
@@ -67,6 +65,9 @@
         
         [Parameter(Mandatory = $false, ParameterSetName = 'UIDFilter')]
         [string]$DeviceUID,
+
+        [Parameter(Mandatory = $false, ParameterSetName = 'SiteFilter')]
+        [string]$SiteUID,
 
         [string]$ApiUrl = 'https://zinfandel-api.centrastage.net',
 
@@ -79,10 +80,12 @@
         $message = ("{0}: Beginning {1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), $MyInvocation.MyCommand)
         If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
     }
-
     Process {
+        $message = ("{0}: Operating in the {1} parameter set." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), $PsCmdlet.ParameterSetName)
+        If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
+
         Switch ($PsCmdlet.ParameterSetName) {
-            { $_ -in ("IDFilter", "AllDevices", "UIDFilter") } {
+            { $_ -in ("IDFilter", "AllDevices", "UIDFilter", "SiteFilter") } {
                 # Define parameters for Invoke-WebRequest cmdlet.
                 $params = @{
                     Uri         = '{0}/api{1}' -f $ApiUrl, "/v2/account/devices"
@@ -106,6 +109,12 @@
                 $message = ("{0}: Updated `$params hash table (Uri key). The values are:`n{1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), (($params | Out-String) -split "`n"))
                 If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
             }
+            "SiteFilter" {
+                $params.set_item("Uri", "$(($params.Uri).TrimEnd("/account/devices")+"/site/$SiteUID/devices")")
+
+                $message = ("{0}: Updated `$params hash table (Uri key). The values are:`n{1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), (($params | Out-String) -split "`n"))
+                If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
+            }
         }
 
         # Make request.
@@ -113,7 +122,14 @@
         If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
 
         Try {
-            $webResponse = (Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop).Content
+            Switch ($PsCmdlet.ParameterSetName) {
+                { $_ -in ("IDFilter", "AllDevices", "UIDFilter") } {
+                    $webResponse = (Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop).Content
+                }
+                "SiteFilter" {
+                    $webResponse = Invoke-WebRequest @params -UseBasicParsing -ErrorAction Stop
+                }
+            }
         }
         Catch {
             $message = ("{0}: It appears that the web request failed. Check your credentials and try again. To prevent errors, {1} will exit. The specific error message is: {2}" `
@@ -133,12 +149,21 @@
             "UIDFilter" {
                 $devices = ($webResponse | ConvertFrom-Json)
             }
+            "SiteFilter" {
+                $devices = ($webResponse | ConvertFrom-Json).devices
+            }
         }
 
         While ((($webResponse | ConvertFrom-Json).pageDetails).nextPageUrl) {
             $stopLoop = $false
             $page = ((($webResponse | ConvertFrom-Json).pageDetails).nextPageUrl).Split("&")[1]
-            $resourcePath = "/v2/account/devices?$page"
+
+            If ($PsCmdlet.ParameterSetName -eq "SiteFilter") {
+                $resourcePath = "/v2/account/devices?$page"
+            }
+            Else {
+                $resourcePath = "/v2/site/$SiteUID/devices?$page"
+            }
 
             $params = @{
                 Uri         = '{0}/api{1}' -f $ApiUrl, $resourcePath
@@ -181,4 +206,4 @@
 
         Return $devices
     }
-} #1.0.0.9
+} #1.0.0.10
