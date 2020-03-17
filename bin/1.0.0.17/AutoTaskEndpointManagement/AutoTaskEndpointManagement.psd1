@@ -97,7 +97,7 @@
             # IconUri = ''
 
             # ReleaseNotes of this module
-            ReleaseNotes = 'Updated Get-AemDevice to 1.0.0.10 to add support for getting devices from a site, based on the site UID.'
+            ReleaseNotes = 'Updated Get-AemDevice to 1.0.0.11 (param validation).'
 
             # External dependent modules of this module
             # ExternalModuleDependencies = ''

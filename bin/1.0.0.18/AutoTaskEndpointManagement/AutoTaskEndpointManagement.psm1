@@ -376,7 +376,7 @@ Function Get-AemDevice {
                     $false
                 }
             })]
-        [string[]]$SiteUID,
+        [System.Guid]$SiteUID,
 
         [string]$ApiUrl = 'https://zinfandel-api.centrastage.net',
 
