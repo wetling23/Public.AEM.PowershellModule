@@ -24,6 +24,7 @@
             V1.0.0.8 date: 5 December 2019
             V1.0.0.9 date: 11 December 2019
             V1.0.0.10 date: 16 March 2020
+            V1.0.0.11 date: 17 March 2020
         .LINK
             https://github.com/wetling23/Public.AEM.PowershellModule
         .PARAMETER AccessToken
@@ -67,7 +68,16 @@
         [string]$DeviceUID,
 
         [Parameter(Mandatory = $false, ParameterSetName = 'SiteFilter')]
-        [string]$SiteUID,
+        [ValidateScript( {
+                try {
+                    $null = [System.Guid]::Parse($_)
+                    $true
+                }
+                catch {
+                    $false
+                }
+            })]
+        [System.Guid]$SiteUID,
 
         [string]$ApiUrl = 'https://zinfandel-api.centrastage.net',
 
