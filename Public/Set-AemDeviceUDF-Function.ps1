@@ -11,6 +11,7 @@ Function Set-AemDeviceUdf {
                 - Changed Out-Null to $null.
             V1.0.0.2 date: 5 December 2019
             V1.0.0.3 date: 11 December 2019
+            V1.0.0.4 date: 23 June 2020
         .LINK
             https://github.com/wetling23/Public.AEM.PowershellModule
         .PARAMETER AccessToken
@@ -73,7 +74,7 @@ Function Set-AemDeviceUdf {
             Body        = ($UdfData | ConvertTo-Json)
         }
 
-        $message = ("{0}: Updated `$params hash table. The values are:`n{1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), (($params | Out-String) -split "`n"))
+        $message = ("{0}: Updated `$params hash table. The values are:`n{1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), ($params | Out-String))
         If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
 
         # Make request.
@@ -91,4 +92,4 @@ Function Set-AemDeviceUdf {
             Return "Error"
         }
     }
-} #1.0.0.3
+} #1.0.0.4

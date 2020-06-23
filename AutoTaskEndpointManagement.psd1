@@ -4,7 +4,7 @@
     RootModule        = 'AutoTaskEndpointManagement.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '1.0.0.20'
+    ModuleVersion     = '1.0.0.21'
 
     # ID used to uniquely identify this module
     GUID              = 'b3b16a0a-35f8-4ee9-bd4d-868e8b1dc24a'
@@ -97,7 +97,7 @@
             # IconUri = ''
 
             # ReleaseNotes of this module
-            ReleaseNotes = 'Updated Out-PsLogging to 1.0.0.4 (Block stderr output param).'
+            ReleaseNotes = 'Fixed bug in logging of hash table.'
 
             # External dependent modules of this module
             # ExternalModuleDependencies = ''

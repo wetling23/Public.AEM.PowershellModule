@@ -14,6 +14,7 @@
             V1.0.0.3 date: 5 December 2019
             V1.0.0.4 date: 11 December 2019
             V1.0.0.5 date: 3 March 2020
+            V1.0.0.6 date: 23 June 2020
         .LINK
             https://github.com/wetling23/Public.AEM.PowershellModule
         .PARAMETER AccessToken
@@ -65,13 +66,13 @@
                     Headers     = @{'Authorization' = 'Bearer {0}' -f $AccessToken }
                 }
 
-                $message = ("{0}: Updated `$params hash table. The values are:`n{1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), (($params | Out-String) -split "`n"))
+                $message = ("{0}: Updated `$params hash table. The values are:`n{1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), ($params | Out-String))
                 If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
             }
             "IDFilter" {
                 $params.set_item("Uri", "$(($params.Uri).TrimEnd("/account/sites")+"/site/$SiteUid")")
 
-                $message = ("{0}: Updated `$params hash table (Uri key). The values are:`n{1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), (($params | Out-String) -split "`n"))
+                $message = ("{0}: Updated `$params hash table (Uri key). The values are:`n{1}." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), ($params | Out-String))
                 If ($PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue') { If ($EventLogSource -and (-NOT $LogPath)) { Out-PsLogging -EventLogSource $EventLogSource -MessageType Verbose -Message $message } ElseIf ($LogPath -and (-NOT $EventLogSource)) { Out-PsLogging -LogPath $LogPath -MessageType Verbose -Message $message } Else { Out-PsLogging -ScreenOnly -MessageType Verbose -Message $message } }
             }
         }
@@ -133,4 +134,4 @@
 
         Return $sites
     }
-} #1.0.0.5
+} #1.0.0.6
