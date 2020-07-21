@@ -13,6 +13,7 @@ Function Set-AemSiteDescription {
             V1.0.0.3 date: 11 December 2019
             V1.0.0.4 date: 23 June 2020
             V1.0.0.5 date: 30 June 2020
+            V1.0.0.6 date: 21 July 2020
         .LINK
             https://github.com/wetling23/Public.AEM.PowershellModule
         .PARAMETER AccessToken
@@ -85,6 +86,7 @@ Function Set-AemSiteDescription {
         Else {
             If ($EventLogSource -and (-NOT $LogPath)) {
                 $commandParams = @{
+                    Verbose        = $false
                     EventLogSource = $EventLogSource
                     AccessToken    = $AccessToken
                     ApiUrl         = $ApiUrl
@@ -92,6 +94,7 @@ Function Set-AemSiteDescription {
             }
             ElseIf ($LogPath -and (-NOT $EventLogSource)) {
                 $commandParams = @{
+                    Verbose     = $false
                     LogPath     = $LogPath
                     AccessToken = $AccessToken
                     ApiUrl      = $ApiUrl
@@ -99,6 +102,7 @@ Function Set-AemSiteDescription {
             }
             Else {
                 $commandParams = @{
+                    Verbose     = $false
                     AccessToken = $AccessToken
                     ApiUrl      = $ApiUrl
                 }
@@ -139,4 +143,4 @@ Function Set-AemSiteDescription {
             Return "Error"
         }
     }
-} #1.0.0.5
+} #1.0.0.6
