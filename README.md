@@ -8,6 +8,9 @@ This project is also published in the PowerShell Gallery at https://www.powershe
 * From GitHub: Save `/bin/<version>/AutoTaskEndpointManagement/<files>` to your module directory
 
 # Behavior changes
+## 1.0.0.27
+- Out-PsLogging
+  - Prepending [INFO], [WARNING], [ERROR], [VERBOSE] blocks before each message.
 ## 1.0.0.11
 * New behavior in logging. Instead of only logging to the Windows event log, the module now defaults to host only.
 * The EventLogSource parameter is still available. If the provided source does not exist, the command will switch to host-only output.
