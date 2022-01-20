@@ -58,7 +58,7 @@
             This will return the device matching the specified UID.
     #>
     [CmdletBinding(DefaultParameterSetName = 'AllDevices')]
-    [alias('Get-LogicMonitorDevices')]
+    [alias('Get-AemDevice')]
     Param (
         [Parameter(Mandatory = $True, ValueFromPipeline = $true)]
         [Alias("AemAccessToken")]
