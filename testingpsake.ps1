@@ -1,10 +1,10 @@
-properties {
-    $repoPath = "C:\codeRepository\Public.LogicMonitor.PowerShellModule"
-    $manifest = Import-PowerShellDataFile -Path $repoPath\LogicMonitor.psd1
-    $outputPath = "$repoPath\bin\$($manifest.ModuleVersion)\LogicMonitor"
-    $srcPsd1 = "$repoPath\LogicMonitor.psd1"
-    $outPsd1 = "$outputPath\LogicMonitor.psd1"
-    $outPsm1 = "$outputPath\LogicMonitor.psm1"
+Properties {
+    $repoPath = "C:\codeRepository\Public.AEM.PowershellModule"
+    $manifest = Import-PowerShellDataFile -Path $repoPath\AutoTaskEndpointManagement.psd1
+    $outputPath = "$repoPath\bin\$($manifest.ModuleVersion)\AutoTaskEndpointManagement"
+    $srcPsd1 = "$repoPath\AutoTaskEndpointManagement.psd1"
+    $outPsd1 = "$outputPath\AutoTaskEndpointManagement.psd1"
+    $outPsm1 = "$outputPath\AutoTaskEndpointManagement.psm1"
 }
 
 task default -depends Build, Zip
