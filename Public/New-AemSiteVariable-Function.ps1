@@ -1,4 +1,4 @@
-Function New-AemSiteDescription {
+Function New-AemSiteVariable {
     <#
         .DESCRIPTION
             Creates a new site variable.
