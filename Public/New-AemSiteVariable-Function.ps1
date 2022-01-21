@@ -23,7 +23,7 @@ Function New-AemSiteVariable {
         .PARAMETER LogPath
             When included (when EventLogSource is null), represents the file, to which the cmdlet will output will be logged. If no path or event log source are provided, output is sent only to the host.
         .EXAMPLE
-            New-AemSiteDescription -AccessToken $token -SiteUID 9fd7io7a-fe95-44k0-9cd1-fcc0vcbc7900 -Variable @(@{"name" = "PatchGroup"; "value" = "Prod"; masked = "false" }, @{"name" = "PatchTeam"; "value" = "Team 1"; masked = "false" }) -Verbose
+            New-AemSiteVariable -AccessToken $token -SiteUID 9fd7io7a-fe95-44k0-9cd1-fcc0vcbc7900 -Variable @(@{"name" = "PatchGroup"; "value" = "Prod"; masked = "false" }, @{"name" = "PatchTeam"; "value" = "Team 1"; masked = "false" }) -Verbose
 
             In this example, the command will create a two new site variables ("PatchGroup" and "PatchTeam") with the specified values (neither field will be masked), in the site with UID "9fd7io7a-fe95-44k0-9cd1-fcc0vcbc7900". Verbose logging output is sent to the host only.
     #>
