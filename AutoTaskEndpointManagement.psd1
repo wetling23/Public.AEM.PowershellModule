@@ -4,7 +4,7 @@
     RootModule        = 'AutoTaskEndpointManagement.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '1.0.0.34'
+    ModuleVersion     = '2024.08.13.0'
 
     # ID used to uniquely identify this module
     GUID              = 'b3b16a0a-35f8-4ee9-bd4d-868e8b1dc24a'
@@ -61,7 +61,7 @@
     FunctionsToExport = 'Find-AemSoftwareInstance',
     'Get-AemDevicesFromSite', 'Get-AemDevice', 'Get-AemDeviceAudit', 'Get-AemJob', 'Get-AemSite', 'Get-AemSiteVariable', 'Get-AemSite',
     'Get-AemSoftwareList', 'Get-AemUser',
-    'New-AemApiAccessToken', 'New-AemSiteVariable',
+    'New-AemApiAccessToken', 'New-AemSite', 'New-AemSiteVariable',
     'Out-PsLogging',
     'Set-AemDeviceUdf', 'Set-AemSiteDescription', 'Set-AemSiteVariable',
     'Start-AemQuickJob'
@@ -99,7 +99,7 @@
             # IconUri = ''
 
             # ReleaseNotes of this module
-            ReleaseNotes = 'Get-AemDevice alias update.'
+            ReleaseNotes = 'Added New-AemSite.'
 
             # External dependent modules of this module
             # ExternalModuleDependencies = ''
