@@ -4,7 +4,7 @@
     RootModule        = 'AutoTaskEndpointManagement.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '2024.08.13.0'
+    ModuleVersion     = '2024.08.27.0'
 
     # ID used to uniquely identify this module
     GUID              = 'b3b16a0a-35f8-4ee9-bd4d-868e8b1dc24a'
@@ -16,7 +16,7 @@
     CompanyName       = ''
 
     # Copyright statement for this module
-    Copyright         = '(c) 2022 mhashemi. All rights reserved.'
+    Copyright         = '(c) 2024 mhashemi. All rights reserved.'
 
     # Description of the functionality provided by this module
     Description       = 'Powershell module refactoring the AutoTask Endpoint Management REST API.'
@@ -99,7 +99,7 @@
             # IconUri = ''
 
             # ReleaseNotes of this module
-            ReleaseNotes = 'Added New-AemSite.'
+            ReleaseNotes = 'Updated New-AemSite to 2024.08.27.0.'
 
             # External dependent modules of this module
             # ExternalModuleDependencies = ''

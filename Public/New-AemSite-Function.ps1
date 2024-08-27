@@ -4,7 +4,7 @@ Function New-AemSite {
             Creates a new site.
         .NOTES
             Author: Mike Hashemi
-            V2024.08.13.0
+            V2024.08.27.0
         .LINK
             https://github.com/wetling23/Public.AEM.PowershellModule
         .PARAMETER AccessToken
@@ -18,18 +18,20 @@ Function New-AemSite {
         .PARAMETER LogPath
             When included (when EventLogSource is null), represents the file, to which the cmdlet will output will be logged. If no path or event log source are provided, output is sent only to the host.
         .EXAMPLE
-            New-AemSiteVariable -AccessToken $token -SiteUID 9fd7io7a-fe95-44k0-9cd1-fcc0vcbc7900 -Variable @(@{"name" = "PatchGroup"; "value" = "Prod"; masked = "false" }, @{"name" = "PatchTeam"; "value" = "Team 1"; masked = "false" }) -Verbose
+            PS C:\> $Properties = @{
+                name                 = "New Site Name"
+                onDemand             = $false
+                splashtopAutoInstall = $false
+            }
+            PS C:\> New-AemSite -AccessToken $token -Properties $Properties -Verbose
 
-            In this example, the command will create a two new site variables ("PatchGroup" and "PatchTeam") with the specified values (neither field will be masked), in the site with UID "9fd7io7a-fe95-44k0-9cd1-fcc0vcbc7900". Verbose logging output is sent to the host only.
+            In this example, the command will create a site called "New Site Name". Verbose logging output is sent only to the host.
     #>
     [CmdletBinding()]
     Param (
         [Parameter(Mandatory = $True)]
         [Alias("AemAccessToken")]
         [String]$AccessToken,
-
-        [Parameter(Mandatory = $True)]
-        [String]$SiteUid,
 
         [Parameter(Mandatory = $True)]
         [Hashtable]$Properties,
@@ -98,6 +100,8 @@ Function New-AemSite {
 
         If ($response.id) {
             $message = ("{0}: Successfully created the site (ID: {1})." -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), $response.id); If ($loggingParams.Verbose) { Out-PsLogging @loggingParams -MessageType Verbose -Message $message }
+
+            Return $response
         }
         Else {
             $message = ("{0}: Failed to delete the variable(s).`r`nHTTP status code: {1}`r`nHTTP status description: {2}" -f ([datetime]::Now).ToString("yyyy-MM-dd`THH:mm:ss"), $response.StatusCode, $response.StatusDescription); Out-PsLogging @loggingParams -MessageType Error -Message $message
@@ -105,4 +109,4 @@ Function New-AemSite {
             Return "Error"
         }
     }
-} #2024.08.13.0
+} #2024.08.27.0
